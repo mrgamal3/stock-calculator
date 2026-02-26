@@ -3,119 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مساعد البورصة الاحترافي - شامل العمولات</title>
+    <title>مساعد البورصة الاحترافي - نسخة PDF</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        :root { --primary: #27ae60; --error: #e74c3c; --warning: #f39c12; --secondary: #2980b9; --dark: #2c3e50; --bg: #f4f7f6; }
+        :root { --primary: #27ae60; --secondary: #2980b9; --dark: #2c3e50; --bg: #f4f7f6; }
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; margin: 0; }
         .container { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
-        h2 { text-align: center; color: var(--dark); border-bottom: 3px solid var(--primary); padding-bottom: 10px; margin-top: 0; }
+        h2 { text-align: center; color: var(--dark); border-bottom: 3px solid var(--primary); padding-bottom: 10px; }
         .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-        .full-width { grid-column: span 2; }
         label { display: block; margin-bottom: 4px; color: #666; font-size: 0.85rem; font-weight: bold; }
-        input { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 10px; box-sizing: border-box; font-size: 1rem; }
-        .btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
-        button { flex: 1; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem; }
+        input { width: 100%; padding: 10px; border: 2px solid #eee; border-radius: 8px; box-sizing: border-box; }
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        button { flex: 1; min-width: 120px; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         .btn-calc { background: var(--dark); color: white; }
-        .btn-save { background: var(--primary); color: white; display: none; }
-        .alert { padding: 15px; border-radius: 10px; margin-bottom: 15px; display: none; border-right: 6px solid; font-size: 0.9rem; }
-        .alert-error { background: #fdf2f2; color: var(--error); border-right-color: var(--error); }
-        .alert-warning { background: #fff9f0; color: var(--warning); border-right-color: var(--warning); }
-        .result-card { background: #f8f9fa; padding: 20px; border-radius: 15px; border-right: 6px solid var(--secondary); margin-bottom: 20px; display: none; }
-        .result-item { margin-bottom: 8px; font-size: 1rem; }
-        .highlight { font-weight: bold; color: var(--dark); }
-        .chart-container { height: 230px; margin-bottom: 20px; }
-        .history-item { background: white; padding: 12px; border-radius: 10px; border: 1px solid #eee; margin-bottom: 10px; font-size: 0.85rem; }
+        .btn-pdf { background: #e74c3c; color: white; display: none; }
+        .result-card { background: #f8f9fa; padding: 20px; border-radius: 15px; border-right: 6px solid var(--secondary); margin: 20px 0; display: none; }
+        .chart-container { height: 250px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>📊 رادار التعديل (شامل العمولات)</h2>
+<div class="container" id="app-content">
+    <h2>📊 تقرير تعديل المحفظة</h2>
     
     <div class="input-grid">
-        <div><label>الأسهم الحالية</label><input type="number" id="oldQty" placeholder="100"></div>
-        <div><label>سعر التكلفة</label><input type="number" id="oldPrice" placeholder="50"></div>
-        <div><label>سعر السهم الآن</label><input type="number" id="currentPrice" placeholder="30"></div>
-        <div><label>المتوسط المستهدف</label><input type="number" id="targetPrice" placeholder="35"></div>
-        <div><label>نسبة العمولة (4 في الألف = 0.004)</label><input type="number" id="commPct" value="0.004" step="0.001"></div>
+        <div><label>الأسهم الحالية</label><input type="number" id="oldQty" value="100"></div>
+        <div><label>سعر التكلفة</label><input type="number" id="oldPrice" value="50"></div>
+        <div><label>سعر السوق</label><input type="number" id="currentPrice" value="30"></div>
+        <div><label>المتوسط المستهدف</label><input type="number" id="targetPrice" value="35"></div>
+        <div><label>العمولة (0.004)</label><input type="number" id="commPct" value="0.004"></div>
         <div><label>الربح المستهدف (%)</label><input type="number" id="profitPct" value="5"></div>
-        <div class="full-width"><label>السيولة المتاحة (اختياري)</label><input type="number" id="maxBudget" placeholder="أدخل مبلغاً"></div>
     </div>
 
     <div class="btn-group">
-        <button class="btn-calc" onclick="calculate()">حساب الخطة</button>
-        <button id="saveBtn" class="btn-save" onclick="saveData()">حفظ 💾</button>
+        <button class="btn-calc" onclick="calculate()">حساب وتحليل</button>
+        <button id="pdfBtn" class="btn-pdf" onclick="downloadPDF()">تحميل التقرير PDF 📄</button>
     </div>
 
-    <div id="logicError" class="alert alert-error"></div>
-    <div id="budgetWarning" class="alert alert-warning"></div>
-
     <div id="resultCard" class="result-card">
-        <div class="result-item">🛒 شراء إضافي: <span id="resQty" class="highlight">0</span> سهم</div>
-        <div class="result-item">🏷️ تكلفة الشراء + العمولة: <span id="resCost" class="highlight">0</span></div>
-        <div class="result-item">🚀 سعر البيع المطلوب للربح: <span id="resSell" class="highlight" style="color:var(--secondary)">0</span></div>
-        <div style="font-size: 0.8rem; color: #7f8c8d; margin-top: 5px;">* سعر البيع يأخذ في الاعتبار تغطية عمولتي البيع والشراء.</div>
+        <div id="report-text">
+            <p>✅ المطلوب شراء: <b id="resQty">0</b> سهم</p>
+            <p>🏷️ التكلفة الإجمالية (بالعمولة): <b id="resCost">0</b></p>
+            <p>🚀 سعر البيع المستهدف: <b id="resSell" style="color:var(--secondary)">0</b></p>
+        </div>
     </div>
 
     <div class="chart-container"><canvas id="myChart"></canvas></div>
-
-    <div class="history-section">
-        <h3>📜 السجل</h3>
-        <div id="historyList"></div>
-    </div>
 </div>
 
 <script>
     let myChart = null;
 
     function calculate() {
-        const data = {
-            oldQty: parseFloat(document.getElementById('oldQty').value),
-            oldPrice: parseFloat(document.getElementById('oldPrice').value),
-            currP: parseFloat(document.getElementById('currentPrice').value),
-            targetP: parseFloat(document.getElementById('targetPrice').value),
-            comm: parseFloat(document.getElementById('commPct').value),
-            profit: parseFloat(document.getElementById('profitPct').value) / 100,
-            budget: parseFloat(document.getElementById('maxBudget').value) || Infinity
-        };
+        const qOld = parseFloat(document.getElementById('oldQty').value);
+        const pOld = parseFloat(document.getElementById('oldPrice').value);
+        const pCurr = parseFloat(document.getElementById('currentPrice').value);
+        const pTarget = parseFloat(document.getElementById('targetPrice').value);
+        const comm = parseFloat(document.getElementById('commPct').value);
+        const profit = parseFloat(document.getElementById('profitPct').value) / 100;
 
-        document.getElementById('logicError').style.display = "none";
-        document.getElementById('budgetWarning').style.display = "none";
-        document.getElementById('resultCard').style.display = "none";
+        if (pTarget <= pCurr) { alert("المتوسط المستهدف يجب أن يكون أكبر من السعر الحالي"); return; }
 
-        if (data.targetP <= data.currP) {
-            const err = document.getElementById('logicError');
-            err.style.display = "block";
-            err.innerHTML = `⚠️ خطأ منطقي: المتوسط المستهدف يجب أن يكون أعلى من سعر السوق.`;
-            return;
-        }
+        const qNeeded = Math.ceil((qOld * (pOld - pTarget)) / (pTarget - pCurr));
+        const cost = (qNeeded * pCurr) * (1 + comm);
+        const sellPrice = (pTarget * (1 + profit)) / (1 - comm);
 
-        // 1. حساب الكمية المطلوبة (باستخدام معادلتك)
-        const qNeeded = Math.ceil((data.oldQty * (data.oldPrice - data.targetP)) / (data.targetP - data.currP));
-        
-        // 2. حساب تكلفة الشراء الإضافية مع العمولة
-        const purchaseCost = qNeeded * data.currP;
-        const purchaseComm = purchaseCost * data.comm;
-        const totalPurchaseCost = purchaseCost + purchaseComm;
-
-        // 3. حساب سعر البيع المطلوب لتغطية العمولات وصافي الربح
-        // المعادلة: سعر البيع = (المتوسط المستهدف * (1 + الربح)) / (1 - عمولة البيع)
-        const sellPriceNeeded = (data.targetP * (1 + data.profit)) / (1 - data.comm);
-
-        if (totalPurchaseCost > data.budget) {
-            document.getElementById('budgetWarning').style.display = "block";
-            document.getElementById('budgetWarning').innerHTML = `⚠️ السيولة المطلوبة (${totalPurchaseCost.toLocaleString()}) تتجاوز ميزانيتك.`;
-        }
-
-        // عرض النتائج
         document.getElementById('resQty').innerText = qNeeded.toLocaleString();
-        document.getElementById('resCost').innerText = totalPurchaseCost.toLocaleString();
-        document.getElementById('resSell').innerText = sellPriceNeeded.toFixed(3);
+        document.getElementById('resCost').innerText = cost.toLocaleString(undefined, {minimumFractionDigits: 2});
+        document.getElementById('resSell').innerText = sellPrice.toFixed(3);
+        
         document.getElementById('resultCard').style.display = "block";
-        document.getElementById('saveBtn').style.display = "block";
+        document.getElementById('pdfBtn').style.display = "inline-block";
 
-        updateChart(data.oldPrice, data.targetP, data.currP);
+        updateChart(pOld, pTarget, pCurr);
     }
 
     function updateChart(oldP, targetP, currP) {
@@ -124,18 +85,28 @@
         myChart = new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['التكلفة الحالية', 'المتوسط الجديد', 'سعر السوق'],
+                labels: ['التكلفة السابقة', 'المتوسط الجديد', 'سعر السوق'],
                 datasets: [{
                     data: [oldP, targetP, currP],
                     backgroundColor: ['#e74c3c', '#2980b9', '#27ae60'],
                     borderRadius: 10
                 }]
             },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            options: { responsive: true, maintainAspectRatio: false }
         });
     }
 
-    function saveData() { alert("تم الحفظ في ذاكرة المتصفح"); }
+    function downloadPDF() {
+        const element = document.getElementById('app-content');
+        const opt = {
+            margin: 10,
+            filename: 'Stock_Report.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
 </script>
 </body>
 </html>
