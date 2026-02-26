@@ -3,53 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مساعد البورصة الاحترافي - نسخة PDF</title>
+    
+    <title>حاسبة متوسط الأسهم الذكية | إدارة محفظة البورصة</title>
+    <meta name="description" content="أفضل أداة مجانية لحساب تعديل متوسط الأسهم في البورصة، حساب عمولة الوساطة، وتحديد سعر البيع للربح مع استخراج تقارير PDF.">
+    <meta name="keywords" content="بورصة، أسهم، تعديل المتوسط، حساب الخسارة، عمولة الوساطة، تداول، استثمار، حاسبة أسهم">
+    <meta name="author" content="MrGamal3">
+
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
     <style>
         :root { --primary: #27ae60; --secondary: #2980b9; --dark: #2c3e50; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); display: flex; justify-content: center; padding: 20px; margin: 0; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 20px; margin: 0; }
         .container { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 600px; }
-        h2 { text-align: center; color: var(--dark); border-bottom: 3px solid var(--primary); padding-bottom: 10px; }
+        h1 { text-align: center; color: var(--dark); font-size: 1.8rem; border-bottom: 3px solid var(--primary); padding-bottom: 10px; margin-bottom: 20px; }
         .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
         label { display: block; margin-bottom: 4px; color: #666; font-size: 0.85rem; font-weight: bold; }
         input { width: 100%; padding: 10px; border: 2px solid #eee; border-radius: 8px; box-sizing: border-box; }
-        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
         button { flex: 1; min-width: 120px; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         .btn-calc { background: var(--dark); color: white; }
         .btn-pdf { background: #e74c3c; color: white; display: none; }
-        .result-card { background: #f8f9fa; padding: 20px; border-radius: 15px; border-right: 6px solid var(--secondary); margin: 20px 0; display: none; }
+        .result-card { background: #f8f9fa; padding: 20px; border-radius: 15px; border-right: 6px solid var(--secondary); margin-bottom: 20px; display: none; }
         .chart-container { height: 250px; margin-bottom: 20px; }
+        
+        /* تنسيق عداد الزوار */
+        .visitor-counter { margin-top: 30px; font-size: 0.8rem; color: #7f8c8d; text-align: center; background: #fff; padding: 10px; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
 
 <div class="container" id="app-content">
-    <h2>📊 تقرير تعديل المحفظة</h2>
+    <h1>📈 حاسبة متوسط الأسهم</h1>
     
     <div class="input-grid">
-        <div><label>الأسهم الحالية</label><input type="number" id="oldQty" value="100"></div>
-        <div><label>سعر التكلفة</label><input type="number" id="oldPrice" value="50"></div>
-        <div><label>سعر السوق</label><input type="number" id="currentPrice" value="30"></div>
-        <div><label>المتوسط المستهدف</label><input type="number" id="targetPrice" value="35"></div>
-        <div><label>العمولة (0.004)</label><input type="number" id="commPct" value="0.004"></div>
+        <div><label>الأسهم الحالية</label><input type="number" id="oldQty" placeholder="مثلاً: 100"></div>
+        <div><label>سعر التكلفة</label><input type="number" id="oldPrice" placeholder="مثلاً: 50"></div>
+        <div><label>سعر السوق</label><input type="number" id="currentPrice" placeholder="مثلاً: 30"></div>
+        <div><label>المتوسط المستهدف</label><input type="number" id="targetPrice" placeholder="مثلاً: 35"></div>
+        <div><label>العمولة (0.004)</label><input type="number" id="commPct" value="0.004" step="0.001"></div>
         <div><label>الربح المستهدف (%)</label><input type="number" id="profitPct" value="5"></div>
     </div>
 
     <div class="btn-group">
-        <button class="btn-calc" onclick="calculate()">حساب وتحليل</button>
-        <button id="pdfBtn" class="btn-pdf" onclick="downloadPDF()">تحميل التقرير PDF 📄</button>
+        <button class="btn-calc" onclick="calculate()">حساب وتحليل الخطة</button>
+        <button id="pdfBtn" class="btn-pdf" onclick="downloadPDF()">تحميل تقرير PDF 📄</button>
     </div>
 
     <div id="resultCard" class="result-card">
         <div id="report-text">
-            <p>✅ المطلوب شراء: <b id="resQty">0</b> سهم</p>
-            <p>🏷️ التكلفة الإجمالية (بالعمولة): <b id="resCost">0</b></p>
-            <p>🚀 سعر البيع المستهدف: <b id="resSell" style="color:var(--secondary)">0</b></p>
+            <p>✅ عدد الأسهم المطلوب شراؤها: <b id="resQty">0</b> سهم</p>
+            <p>🏷️ التكلفة الإجمالية (شاملة العمولة): <b id="resCost">0</b></p>
+            <p>🚀 سعر البيع المستهدف للربح: <b id="resSell" style="color:var(--secondary)">0</b></p>
         </div>
     </div>
 
     <div class="chart-container"><canvas id="myChart"></canvas></div>
+</div>
+
+<div class="visitor-counter">
+    عدد زيارات الموقع: 
+    <img src="https://hitwebcounter.com/counter/counter.php?page=stock_calc_mrgamal&style=0006&nbdigits=5&type=page&initCount=0" title="Free Counter" Alt="web counter" border="0" style="vertical-align: middle; margin-right: 5px;">
 </div>
 
 <script>
@@ -63,6 +79,7 @@
         const comm = parseFloat(document.getElementById('commPct').value);
         const profit = parseFloat(document.getElementById('profitPct').value) / 100;
 
+        if (!qOld || !pOld || !pCurr || !pTarget) { alert("يرجى إدخال كافة البيانات"); return; }
         if (pTarget <= pCurr) { alert("المتوسط المستهدف يجب أن يكون أكبر من السعر الحالي"); return; }
 
         const qNeeded = Math.ceil((qOld * (pOld - pTarget)) / (pTarget - pCurr));
@@ -92,7 +109,7 @@
                     borderRadius: 10
                 }]
             },
-            options: { responsive: true, maintainAspectRatio: false }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
         });
     }
 
@@ -108,5 +125,6 @@
         html2pdf().set(opt).from(element).save();
     }
 </script>
+
 </body>
 </html>
